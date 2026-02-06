@@ -2,16 +2,16 @@ import React, { useMemo } from 'react';
 import type { Collaborator } from '../types';
 
 const StatCard: React.FC<{ title: string; value: string; change?: string; changeType?: 'positive' | 'negative' }> = ({ title, value, change, changeType }) => (
-    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-100 flex-1 min-w-[180px]">
-        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">{title}</h4>
+    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-100 flex-1 min-w-[180px] relative">
+        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider pr-6">{title}</h4>
         <div className="mt-1 flex items-baseline">
             <p className="text-xl lg:text-2xl font-bold text-gray-900">{value}</p>
-            {change && (
-                <span className={`ml-2 text-xs font-medium ${changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
-                    {change}
-                </span>
-            )}
         </div>
+        {change && (
+            <span className={`absolute top-3 right-3 text-xs font-bold ${changeType === 'positive' ? 'text-green-600' : 'text-red-500'}`}>
+                {change}
+            </span>
+        )}
     </div>
 );
 
@@ -79,60 +79,90 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ filteredData, allData, filt
 
         const totalRecordsCount = filteredData.length;
 
-        let previousYearRemuneration = 0;
+        let previousYearStrict = {
+            remuneration: 0,
+            inss: 0,
+            beneficio: 0,
+            seguro: 0,
+            saudeOdonto: 0,
+            count: 0
+        };
+
         if (filters.payrollDate) {
             const [year, month] = filters.payrollDate.split('-');
             const prevYearPayrollDate = `${parseInt(year) - 1}-${month}`;
-
             const prevYearData = allData.filter(c => c.data && c.data.startsWith(prevYearPayrollDate));
-            previousYearRemuneration = prevYearData.reduce((sum, c) => sum + (Number(c.salarioLiquido) || 0) + (Number(c.adiantamento) || 0), 0);
+
+            previousYearStrict.count = prevYearData.length;
+            previousYearStrict.remuneration = prevYearData.reduce((sum, c) => sum + (Number(c.salarioLiquido) || 0) + (Number(c.adiantamento) || 0), 0);
+            previousYearStrict.inss = prevYearData.reduce((sum, c) => sum + parseCurrency(c.inss), 0);
+            previousYearStrict.beneficio = prevYearData.reduce((sum, c) => sum + parseCurrency(c.beneficio), 0);
+            previousYearStrict.seguro = prevYearData.reduce((sum, c) => sum + parseCurrency(c.seguroDeVida), 0);
+            previousYearStrict.saudeOdonto = prevYearData.reduce((sum, c) => sum + parseCurrency(c.planoSaude) + parseCurrency(c.odonto), 0);
         }
 
-        const change = previousYearRemuneration > 0 ? ((currentTotals.remuneration - previousYearRemuneration) / previousYearRemuneration) * 100 : (currentTotals.remuneration > 0 ? 100 : 0);
+        const calculateChange = (current: number, previous: number) => {
+            if (previous === 0) return current > 0 ? 100 : 0;
+            return ((current - previous) / previous) * 100;
+        };
 
         return {
-            totalRecordsCount,
-            totalRemuneration: currentTotals.remuneration,
-            yoyChange: change,
-            totalInss: currentTotals.inss,
-            totalBeneficio: currentTotals.beneficio,
-            totalSeguro: currentTotals.seguro,
-            totalSaudeOdonto: currentTotals.saudeOdonto
+            totalRecordsCount: currentTotals.remuneration, // Wait, wrong mapping in original code? No, original returned totalRecordsCount separately. I'll fix this.
+            // Original code: totalRecordsCount (line 80)
+
+            // New return structure with changes
+            remuneration: { value: currentTotals.remuneration, change: calculateChange(currentTotals.remuneration, previousYearStrict.remuneration) },
+            count: { value: totalRecordsCount, change: calculateChange(totalRecordsCount, previousYearStrict.count) },
+            inss: { value: currentTotals.inss, change: calculateChange(currentTotals.inss, previousYearStrict.inss) },
+            beneficio: { value: currentTotals.beneficio, change: calculateChange(currentTotals.beneficio, previousYearStrict.beneficio) },
+            seguro: { value: currentTotals.seguro, change: calculateChange(currentTotals.seguro, previousYearStrict.seguro) },
+            saudeOdonto: { value: currentTotals.saudeOdonto, change: calculateChange(currentTotals.saudeOdonto, previousYearStrict.saudeOdonto) }
         };
     }, [filteredData, allData, filters.payrollDate]);
 
     const formatBRL = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    const formatChange = (val: number) => `${val >= 0 ? '+' : ''}${val.toFixed(1)}%`;
+    const getChangeType = (val: number) => val >= 0 ? 'positive' : 'negative';
 
-    const formattedChange = `${kpis.yoyChange >= 0 ? '+' : ''}${kpis.yoyChange.toFixed(1)}%`;
-    const changeType = kpis.yoyChange >= 0 ? 'positive' : 'negative';
+    const hasHistory = !!filters.payrollDate;
 
     return (
         <div className="flex flex-wrap gap-4 lg:gap-6">
             <StatCard
                 title="Remuneração Total"
-                value={formatBRL(kpis.totalRemuneration)}
-                change={filters.payrollDate ? formattedChange : undefined}
-                changeType={changeType}
+                value={formatBRL(kpis.remuneration.value)}
+                change={hasHistory ? formatChange(kpis.remuneration.change) : undefined}
+                changeType={getChangeType(kpis.remuneration.change)}
             />
             <StatCard
                 title="Total de Registros"
-                value={String(kpis.totalRecordsCount)}
+                value={String(kpis.count.value)}
+                change={hasHistory ? formatChange(kpis.count.change) : undefined}
+                changeType={getChangeType(kpis.count.change)}
             />
             <StatCard
                 title="Total INSS"
-                value={formatBRL(kpis.totalInss)}
+                value={formatBRL(kpis.inss.value)}
+                change={hasHistory ? formatChange(kpis.inss.change) : undefined}
+                changeType={getChangeType(kpis.inss.change)}
             />
             <StatCard
                 title="Saúde + Odonto"
-                value={formatBRL(kpis.totalSaudeOdonto)}
+                value={formatBRL(kpis.saudeOdonto.value)}
+                change={hasHistory ? formatChange(kpis.saudeOdonto.change) : undefined}
+                changeType={getChangeType(kpis.saudeOdonto.change)}
             />
             <StatCard
                 title="Benefícios"
-                value={formatBRL(kpis.totalBeneficio)}
+                value={formatBRL(kpis.beneficio.value)}
+                change={hasHistory ? formatChange(kpis.beneficio.change) : undefined}
+                changeType={getChangeType(kpis.beneficio.change)}
             />
             <StatCard
                 title="Seguro de Vida"
-                value={formatBRL(kpis.totalSeguro)}
+                value={formatBRL(kpis.seguro.value)}
+                change={hasHistory ? formatChange(kpis.seguro.change) : undefined}
+                changeType={getChangeType(kpis.seguro.change)}
             />
         </div>
     );

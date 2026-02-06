@@ -23,10 +23,10 @@ const Dashboard: React.FC<DashboardProps> = ({ filteredData, allData, onLotacaoS
         if (!maximizedChart) return null;
 
         switch (maximizedChart) {
-            case 'salary': return <SalaryChart data={filteredData} />;
-            case 'cnpj': return <CnpjChart data={filteredData} />;
-            case 'headcount': return <HeadcountChart data={filteredData} onLotacaoSelect={onLotacaoSelect} />;
-            case 'monthly': return <HeadcountByMonthChart allData={allData} payrollDate={filters.payrollDate} />;
+            case 'salary': return <SalaryChart data={filteredData} isMaximized={true} />;
+            case 'cnpj': return <CnpjChart data={filteredData} isMaximized={true} />;
+            case 'headcount': return <HeadcountChart data={filteredData} onLotacaoSelect={onLotacaoSelect} isMaximized={true} />;
+            case 'monthly': return <HeadcountByMonthChart allData={allData} payrollDate={filters.payrollDate} isMaximized={true} />;
             default: return null;
         }
     };

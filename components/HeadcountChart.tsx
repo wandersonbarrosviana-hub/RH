@@ -7,6 +7,7 @@ interface HeadcountChartProps {
     data: Collaborator[];
     onLotacaoSelect: (lotacao: string | null) => void;
     onMaximize?: () => void;
+    isMaximized?: boolean;
 }
 
 const ChartWrapper: React.FC<{ title: string; children: React.ReactNode; onMaximize?: () => void; isScrollable?: boolean }> = ({ title, children, onMaximize, isScrollable }) => (
@@ -39,7 +40,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null;
 };
 
-const HeadcountChart: React.FC<HeadcountChartProps> = ({ data, onLotacaoSelect, onMaximize }) => {
+const HeadcountChart: React.FC<HeadcountChartProps> = ({ data, onLotacaoSelect, onMaximize, isMaximized }) => {
     const chartData = useMemo(() => {
         const countsByLotacao = data.reduce((acc: Record<string, number>, c) => {
             const lotacao = c.lotacao || 'Não definido';
@@ -62,14 +63,12 @@ const HeadcountChart: React.FC<HeadcountChartProps> = ({ data, onLotacaoSelect, 
         }
     };
 
-    const barWidth = 60; // Estimated width per column including gap
-    const minWidth = '100%';
-    // If there are many items, calculate dynamic width. Otherwise 100%.
+    const barWidth = 60;
     const calculatedWidth = chartData.length * barWidth;
-    const shouldUseDynamicWidth = calculatedWidth > 600; // heuristic
+    const shouldUseDynamicWidth = !isMaximized && calculatedWidth > 600;
 
     return (
-        <ChartWrapper title="Registros por Lotação" onMaximize={onMaximize} isScrollable={true}>
+        <ChartWrapper title="Registros por Lotação" onMaximize={onMaximize} isScrollable={!isMaximized}>
             <div style={{ width: shouldUseDynamicWidth ? calculatedWidth : '100%', height: '100%', minWidth: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -94,7 +93,7 @@ const HeadcountChart: React.FC<HeadcountChartProps> = ({ data, onLotacaoSelect, 
                         <Bar dataKey="count" name="Total de Registros" barSize={30} onClick={handleBarClick}>
                             <LabelList dataKey="count" position="top" />
                             {chartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} cursor="pointer" fill={'#f472b6'} />
+                                <Cell key={`cell-${index}`} cursor="pointer" fill={'#ec4899'} />
                             ))}
                         </Bar>
                     </BarChart>

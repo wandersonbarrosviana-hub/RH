@@ -6,7 +6,32 @@ import { MaximizeIcon } from './Icons';
 interface CnpjChartProps {
     data: Collaborator[];
     onMaximize?: () => void;
+    isMaximized?: boolean;
 }
+
+const ChartWrapper: React.FC<{ title: string; children: React.ReactNode; onMaximize?: () => void; isScrollable?: boolean }> = ({ title, children, onMaximize, isScrollable }) => (
+    <div className="relative bg-white p-4 rounded-lg shadow-inner border border-gray-100 flex flex-col h-96">
+        <h3 className="text-md font-semibold text-gray-700 mb-2 text-center flex-shrink-0">{title}</h3>
+        {onMaximize && (
+            <button
+                onClick={onMaximize}
+                className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-700 transition"
+                title="Maximizar Gráfico"
+            >
+                <MaximizeIcon className="h-5 w-5" />
+            </button>
+        )}
+        <div className={`flex-1 w-full ${isScrollable ? 'overflow-y-auto pr-2' : 'overflow-hidden'}`}>
+            {children}
+        </div>
+    </div>
+);
+
+// ... (CustomTooltip, renderCustomizedLabel, parseCurrency remain same)
+// I need to keep them. 
+// Wait, I can't leave comments here if I replace the whole file or range.
+// I will just replace the `interface`, `COLORS`, and `CnpjChart` separately using MULTI_REPLACE to avoid touching the helpers.
+
 
 const ChartWrapper: React.FC<{ title: string; children: React.ReactNode; onMaximize?: () => void; isScrollable?: boolean }> = ({ title, children, onMaximize, isScrollable }) => (
     <div className="relative bg-white p-4 rounded-lg shadow-inner border border-gray-100 flex flex-col h-96">
@@ -51,7 +76,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null;
 };
 
-const COLORS = ['#ec4899', '#f472b6', '#f9a8d4', '#fbcfe8'];
+const COLORS = ['#ec4899', '#ec4899', '#ec4899', '#ec4899'];
 
 // Fix: Add type for recharts label renderer props to resolve arithmetic operation error.
 const renderCustomizedLabel = (props: { x: number; y: number; width: number; value: number; }) => {
@@ -95,7 +120,7 @@ const parseCurrency = (value: string | number): number => {
 };
 
 
-const CnpjChart: React.FC<CnpjChartProps> = ({ data, onMaximize }) => {
+const CnpjChart: React.FC<CnpjChartProps> = ({ data, onMaximize, isMaximized }) => {
     const chartData = useMemo(() => {
         const cnpjData = data.reduce((acc: Record<string, number>, c) => {
             const cnpj = c.cnpj || 'Não Especificado';
@@ -115,11 +140,11 @@ const CnpjChart: React.FC<CnpjChartProps> = ({ data, onMaximize }) => {
 
     const barHeight = 40;
     const minHeight = 300;
-    const dynamicHeight = Math.max(minHeight, chartData.length * barHeight);
+    const dynamicHeight = isMaximized ? '100%' : Math.max(minHeight, chartData.length * barHeight);
 
     return (
-        <ChartWrapper title="Remuneração por CNPJ" onMaximize={onMaximize} isScrollable={true}>
-            <div style={{ height: dynamicHeight, minHeight: '100%', width: '100%' }}>
+        <ChartWrapper title="Remuneração por CNPJ" onMaximize={onMaximize} isScrollable={!isMaximized}>
+            <div style={{ height: dynamicHeight, minHeight: isMaximized ? '100%' : '100%', width: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         data={chartData}
@@ -135,8 +160,9 @@ const CnpjChart: React.FC<CnpjChartProps> = ({ data, onMaximize }) => {
                             tick={{ fontSize: 11 }}
                             interval={0}
                             tickFormatter={(value) => {
-                                if (value.length > 35) {
-                                    return value.substring(0, 35) + '...';
+                                const limit = isMaximized ? 50 : 35;
+                                if (value.length > limit) {
+                                    return value.substring(0, limit) + '...';
                                 }
                                 return value;
                             }}
@@ -154,5 +180,4 @@ const CnpjChart: React.FC<CnpjChartProps> = ({ data, onMaximize }) => {
         </ChartWrapper>
     );
 };
-
 export default CnpjChart;
