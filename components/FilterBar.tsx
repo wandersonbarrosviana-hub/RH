@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { SearchIcon, XCircleIcon } from './Icons';
+import { SearchIcon } from './Icons';
+import { MultiMonthPicker } from './MultiMonthPicker';
 
 interface Filters {
     searchTerm: string;

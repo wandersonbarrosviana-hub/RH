@@ -150,7 +150,6 @@ export default function App() {
                 onAddCollaborator={openAddModal}
                 onImport={importCollaborators}
                 onExport={handleExport}
-                onDeleteAll={deleteAllCollaborators}
                 onSettings={() => setIsSettingsOpen(true)}
                 collaboratorsCount={filteredCollaborators.length}
             />
@@ -198,6 +197,7 @@ export default function App() {
                 onClose={() => setIsSettingsOpen(false)}
                 onSettingsChanged={fetchSettings}
                 onClearFilters={clearFilters}
+                onDeleteAll={deleteAllCollaborators}
             />
         </div>
     );

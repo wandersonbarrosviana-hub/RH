@@ -6,12 +6,11 @@ interface HeaderProps {
     onAddCollaborator: () => void;
     onImport: (file: File) => void;
     onExport: () => void;
-    onDeleteAll: () => void;
     onSettings: () => void;
     collaboratorsCount: number;
 }
 
-const Header: React.FC<HeaderProps> = ({ onAddCollaborator, onImport, onExport, onDeleteAll, onSettings, collaboratorsCount }) => {
+const Header: React.FC<HeaderProps> = ({ onAddCollaborator, onImport, onExport, onSettings, collaboratorsCount }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleImportClick = () => {
@@ -71,17 +70,7 @@ const Header: React.FC<HeaderProps> = ({ onAddCollaborator, onImport, onExport, 
                             </svg>
                             <span className="hidden sm:inline">Configurações</span>
                         </button>
-                        <button
-                            onClick={onDeleteAll}
-                            disabled={collaboratorsCount === 0}
-                            className="hidden sm:flex items-center px-4 py-2 border border-red-500 text-red-500 rounded-full text-sm font-medium hover:bg-red-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Limpar Todos os Dados"
-                        >
-                            <svg className="h-5 w-5 mr-0 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                            <span className="hidden sm:inline">Limpar Tudo</span>
-                        </button>
+
                         <button
                             onClick={onAddCollaborator}
                             className="flex items-center px-4 py-2 bg-pink-500 text-white rounded-full text-sm font-medium hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition shadow"
