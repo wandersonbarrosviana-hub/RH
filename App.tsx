@@ -16,7 +16,7 @@ const INITIAL_FILTERS = {
     empresa: 'all',
     cnpj: 'all',
     lotacao: 'all',
-    payrollDate: '',
+    payrollDate: [] as string[],
 };
 
 export default function App() {
@@ -70,7 +70,12 @@ export default function App() {
             // BUG FIX: Corrected date filtering logic.
             // If payrollDate is set, a record MUST have a date and it MUST match the selected YYYY-MM.
             // Records without a date are now correctly filtered out when a date filter is active.
-            if (payrollDate && (!c.data || !c.data.startsWith(payrollDate))) return false;
+            // Corrected date filtering logic for MULTI-SELECT
+            if (payrollDate.length > 0) {
+                if (!c.data) return false;
+                const matchesDate = payrollDate.some(date => c.data!.startsWith(date));
+                if (!matchesDate) return false;
+            }
 
             if (searchTerm) {
                 const lowercasedFilter = searchTerm.toLowerCase();
@@ -192,6 +197,7 @@ export default function App() {
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
                 onSettingsChanged={fetchSettings}
+                onClearFilters={clearFilters}
             />
         </div>
     );

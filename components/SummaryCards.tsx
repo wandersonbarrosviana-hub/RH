@@ -64,7 +64,7 @@ const parseCurrency = (value: string | number): number => {
 interface SummaryCardsProps {
     filteredData: Collaborator[];
     allData: Collaborator[];
-    filters: { payrollDate: string };
+    filters: { payrollDate: string[] };
 }
 
 const SummaryCards: React.FC<SummaryCardsProps> = ({ filteredData, allData, filters }) => {
@@ -100,10 +100,14 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ filteredData, allData, filt
             count: 0
         };
 
-        if (filters.payrollDate) {
-            const [year, month] = filters.payrollDate.split('-');
-            const prevYearPayrollDate = `${parseInt(year) - 1}-${month}`;
-            const prevYearData = allData.filter(c => c.data && c.data.startsWith(prevYearPayrollDate));
+        if (filters.payrollDate.length > 0) {
+            const prevYearPayrollDates = filters.payrollDate.map(d => {
+                const [year, month] = d.split('-');
+                return `${parseInt(year) - 1}-${month}`;
+            });
+
+            // Filter allData for any record that matches ANY of the previous year dates
+            const prevYearData = allData.filter(c => c.data && prevYearPayrollDates.some(prevDate => c.data!.startsWith(prevDate)));
 
             previousYearStrict.count = prevYearData.length;
             previousYearStrict.remuneration = prevYearData.reduce((sum, c) => sum + (Number(c.salarioLiquido) || 0) + (Number(c.adiantamento) || 0), 0);
@@ -147,7 +151,7 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ filteredData, allData, filt
     const formatChange = (val: number) => `${val >= 0 ? '+' : ''}${val.toFixed(1)}%`;
     const getChangeType = (val: number) => val >= 0 ? 'positive' : 'negative';
 
-    const hasHistory = !!filters.payrollDate;
+    const hasHistory = filters.payrollDate.length > 0;
 
     return (
         <div className="flex flex-wrap gap-4 lg:gap-6">

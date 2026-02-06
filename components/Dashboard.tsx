@@ -13,7 +13,7 @@ interface DashboardProps {
     onLotacaoSelect: (lotacao: string | null) => void;
     onEmpresaSelect: (empresa: string | null) => void;
     onCnpjSelect: (cnpj: string | null) => void;
-    filters: { payrollDate: string; };
+    filters: { payrollDate: string[]; };
 }
 
 type ChartKey = 'salary' | 'cnpj' | 'headcount' | 'monthly';

@@ -5,7 +5,7 @@ import { MaximizeIcon } from './Icons';
 
 interface HeadcountByMonthChartProps {
     allData: Collaborator[];
-    payrollDate: string;
+    payrollDate: string[];
     onMaximize?: () => void;
 }
 
@@ -40,21 +40,21 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const MONTHS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
 const HeadcountByMonthChart: React.FC<HeadcountByMonthChartProps> = ({ allData, payrollDate, onMaximize }) => {
-    
+
     const { chartData, year } = useMemo(() => {
         // Use payrollDate to determine the year, fallback to current year
         const targetYear = payrollDate ? new Date(payrollDate + '-02T00:00:00Z').getFullYear() : new Date().getFullYear();
-        
+
         const monthlyData = MONTHS.map((monthName, index) => {
             const monthString = `${targetYear}-${String(index + 1).padStart(2, '0')}`;
-            
+
             // Filter collaborators whose 'data' field matches the current month and year
             const collaboratorsForMonth = allData.filter(c => c.data && c.data.startsWith(monthString));
-            
+
             // Count the total number of records for the month, not unique CPFs.
             return { name: monthName, count: collaboratorsForMonth.length };
         });
-        
+
         return { chartData: monthlyData, year: targetYear };
     }, [allData, payrollDate]);
 
@@ -71,7 +71,7 @@ const HeadcountByMonthChart: React.FC<HeadcountByMonthChartProps> = ({ allData, 
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="count" name="Headcount" barSize={30}>
                         <LabelList dataKey="count" position="top" />
-                         {chartData.map((entry, index) => (
+                        {chartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={'#f9a8d4'} />
                         ))}
                     </Bar>
