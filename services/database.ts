@@ -130,30 +130,36 @@ export const database = {
         const dbObjects = collaborators.map((c, index) => {
             const obj = collaboratorToDb(c as Collaborator);
             delete obj.id;
-
-            // Log do primeiro objeto para debug
-            if (index === 0) {
-                console.log('🔧 Primeiro objeto convertido:', obj);
-            }
-
             return obj;
         });
 
         console.log('🔧 Inserindo', dbObjects.length, 'objetos no Supabase...');
 
-        const { data, error } = await supabase
-            .from('collaborators')
-            .insert(dbObjects)
-            .select();
+        // Batch inserts to avoid payload limits (chunk size 50)
+        const BATCH_SIZE = 50;
+        const allData: any[] = [];
 
-        if (error) {
-            console.error('❌ Error adding collaborators:', error);
-            console.error('❌ Error details:', JSON.stringify(error, null, 2));
-            throw error;
+        for (let i = 0; i < dbObjects.length; i += BATCH_SIZE) {
+            const batch = dbObjects.slice(i, i + BATCH_SIZE);
+            console.log(`Sending batch ${i} to ${i + batch.length}...`);
+
+            const { data, error } = await supabase
+                .from('collaborators')
+                .insert(batch)
+                .select();
+
+            if (error) {
+                console.error('❌ Error adding collaborators batch:', error);
+                throw error;
+            }
+
+            if (data) {
+                allData.push(...data);
+            }
         }
 
-        console.log('✅ Dados inseridos com sucesso:', data?.length);
-        return data ? data.map(dbToCollaborator) : [];
+        console.log('✅ Dados inseridos com sucesso:', allData.length);
+        return allData.map(dbToCollaborator);
     },
 
     // Atualizar um colaborador
@@ -191,10 +197,11 @@ export const database = {
 
     // Deletar todos os colaboradores (útil para limpar antes de nova importação)
     async deleteAllCollaborators(): Promise<void> {
+        // Use a filter that matches all UUIDs (is not null)
         const { error } = await supabase
             .from('collaborators')
             .delete()
-            .gte('id', 0); // Delete all rows (id >= 0)
+            .not('id', 'is', null);
 
         if (error) {
             console.error('Error deleting all collaborators:', error);

@@ -7,10 +7,11 @@ interface HeaderProps {
     onImport: (file: File) => void;
     onExport: () => void;
     onDeleteAll: () => void;
+    onSettings: () => void;
     collaboratorsCount: number;
 }
 
-const Header: React.FC<HeaderProps> = ({ onAddCollaborator, onImport, onExport, onDeleteAll, collaboratorsCount }) => {
+const Header: React.FC<HeaderProps> = ({ onAddCollaborator, onImport, onExport, onDeleteAll, onSettings, collaboratorsCount }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleImportClick = () => {
@@ -58,6 +59,17 @@ const Header: React.FC<HeaderProps> = ({ onAddCollaborator, onImport, onExport, 
                         >
                             <DownloadIcon className="h-5 w-5 mr-0 sm:mr-2" />
                             <span className="hidden sm:inline">Exportar</span>
+                        </button>
+                        <button
+                            onClick={onSettings}
+                            className="hidden sm:flex items-center px-4 py-2 border border-gray-500 text-gray-500 rounded-full text-sm font-medium hover:bg-gray-50 transition"
+                            title="Configurações (Cargos, Empresas, etc)"
+                        >
+                            <svg className="h-5 w-5 mr-0 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span className="hidden sm:inline">Configurações</span>
                         </button>
                         <button
                             onClick={onDeleteAll}

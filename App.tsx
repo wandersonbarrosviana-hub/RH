@@ -1,11 +1,13 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Header from './components/Header';
 import CollaboratorTable from './components/CollaboratorTable';
 import CollaboratorFormModal from './components/CollaboratorFormModal';
+import { SettingsModal } from './components/SettingsModal';
 import Dashboard from './components/Dashboard';
 import Tabs from './components/Tabs';
 import FilterBar from './components/FilterBar';
 import { useCollaborators } from './hooks/useCollaborators';
+import { settingsService, Setting } from './services/settings';
 import { exportToSpreadsheet } from './services/spreadsheetExporter';
 import type { Collaborator } from './types';
 
@@ -20,17 +22,42 @@ const INITIAL_FILTERS = {
 export default function App() {
     const { collaborators, addCollaborator, importCollaborators, updateCollaborator, deleteCollaborator, deleteAllCollaborators } = useCollaborators();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
     const [activeTab, setActiveTab] = useState('Dashboard');
     const [filters, setFilters] = useState(INITIAL_FILTERS);
+    const [settings, setSettings] = useState<Setting[]>([]);
+
+    const fetchSettings = useCallback(async () => {
+        try {
+            const data = await settingsService.getSettings();
+            setSettings(data || []);
+        } catch (error) {
+            console.error('Failed to fetch settings', error);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchSettings();
+    }, [fetchSettings]);
 
     const filterOptions = useMemo(() => {
-        const empresas = [...new Set(collaborators.map(c => c.empresa).filter(Boolean))];
-        const cnpjs = [...new Set(collaborators.map(c => c.cnpj).filter(Boolean))];
-        const lotacoes = [...new Set(collaborators.map(c => c.lotacao).filter(Boolean))];
-        const cargos = [...new Set(collaborators.map(c => c.cargo).filter(Boolean))];
-        return { empresas, cnpjs, lotacoes, cargos };
-    }, [collaborators]);
+        const uniqueFromData = (key: keyof Collaborator) => [...new Set(collaborators.map(c => c[key] as string).filter(Boolean))];
+
+        const settingsValues = (category: string) => settings.filter(s => s.category === category).map(s => s.value);
+
+        // Merge settings with existing data values, remove duplicates, and sort
+        const mergeOptions = (dataKey: keyof Collaborator, categoryKey: string) => {
+            return Array.from(new Set([...uniqueFromData(dataKey), ...settingsValues(categoryKey)])).sort();
+        };
+
+        return {
+            empresas: mergeOptions('empresa', 'empresa'),
+            cnpjs: mergeOptions('cnpj', 'cnpj'),
+            lotacoes: mergeOptions('lotacao', 'lotacao'),
+            cargos: mergeOptions('cargo', 'cargo'),
+        };
+    }, [collaborators, settings]);
 
     const filteredCollaborators = useMemo(() => {
         return collaborators.filter(c => {
@@ -102,6 +129,7 @@ export default function App() {
                 onImport={importCollaborators}
                 onExport={handleExport}
                 onDeleteAll={deleteAllCollaborators}
+                onSettings={() => setIsSettingsOpen(true)}
                 collaboratorsCount={filteredCollaborators.length}
             />
             <main className="p-4 sm:p-6 lg:p-8">
@@ -141,6 +169,11 @@ export default function App() {
                     options={filterOptions}
                 />
             )}
+            <SettingsModal
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                onSettingsChanged={fetchSettings}
+            />
         </div>
     );
 }
