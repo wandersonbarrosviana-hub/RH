@@ -84,18 +84,37 @@ const dbToCollaborator = (dbObject: any): Collaborator => {
 
 export const database = {
     // Buscar todos os colaboradores
+    // Buscar todos os colaboradores (com paginação para pegar > 1000 registros)
     async getCollaborators(): Promise<Collaborator[]> {
-        const { data, error } = await supabase
-            .from('collaborators')
-            .select('*')
-            .order('nome', { ascending: true });
+        let allCollaborators: any[] = [];
+        let from = 0;
+        const limit = 1000;
+        let moreData = true;
 
-        if (error) {
-            console.error('Error fetching collaborators:', error);
-            throw error;
+        while (moreData) {
+            const { data, error } = await supabase
+                .from('collaborators')
+                .select('*')
+                .order('nome', { ascending: true })
+                .range(from, from + limit - 1);
+
+            if (error) {
+                console.error('Error fetching collaborators:', error);
+                throw error;
+            }
+
+            if (data && data.length > 0) {
+                allCollaborators = [...allCollaborators, ...data];
+                from += limit;
+                if (data.length < limit) {
+                    moreData = false; // Menos que o limite, acabou
+                }
+            } else {
+                moreData = false;
+            }
         }
 
-        return data ? data.map(dbToCollaborator) : [];
+        return allCollaborators.map(dbToCollaborator);
     },
 
     // Adicionar um colaborador
