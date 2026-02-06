@@ -7,6 +7,7 @@ interface CnpjChartProps {
     data: Collaborator[];
     onMaximize?: () => void;
     isMaximized?: boolean;
+    onCnpjSelect?: (cnpj: string | null) => void;
 }
 
 
@@ -104,7 +105,7 @@ const parseCurrency = (value: string | number): number => {
 };
 
 
-const CnpjChart: React.FC<CnpjChartProps> = ({ data, onMaximize, isMaximized }) => {
+const CnpjChart: React.FC<CnpjChartProps> = ({ data, onMaximize, isMaximized, onCnpjSelect }) => {
     const chartData = useMemo(() => {
         const cnpjData = data.reduce((acc: Record<string, number>, c) => {
             const cnpj = c.cnpj || 'Não Especificado';
@@ -121,6 +122,12 @@ const CnpjChart: React.FC<CnpjChartProps> = ({ data, onMaximize, isMaximized }) 
             .map(([name, total]) => ({ name, total }))
             .sort((a, b) => Number(b.total) - Number(a.total));
     }, [data]);
+
+    const handleBarClick = (payload: any) => {
+        if (payload && onCnpjSelect) {
+            onCnpjSelect(payload.name);
+        }
+    };
 
     const barHeight = 40;
     const minHeight = 300;
@@ -152,10 +159,10 @@ const CnpjChart: React.FC<CnpjChartProps> = ({ data, onMaximize, isMaximized }) 
                             }}
                         />
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(236, 72, 153, 0.1)' }} />
-                        <Bar dataKey="total" name="Remuneração Total" barSize={12}>
+                        <Bar dataKey="total" name="Remuneração Total" barSize={12} onClick={handleBarClick} cursor="pointer">
                             <LabelList dataKey="total" position="right" content={renderCustomizedLabel} />
                             {chartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} cursor="pointer" />
                             ))}
                         </Bar>
                     </BarChart>

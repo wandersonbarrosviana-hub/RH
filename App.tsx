@@ -115,7 +115,24 @@ export default function App() {
     };
 
     const handleLotacaoFilter = useCallback((lotacao: string | null) => {
-        setFilters(prev => ({ ...prev, lotacao: lotacao || 'all' }));
+        setFilters(prev => ({
+            ...prev,
+            lotacao: prev.lotacao === lotacao ? 'all' : (lotacao || 'all')
+        }));
+    }, []);
+
+    const handleEmpresaFilter = useCallback((empresa: string | null) => {
+        setFilters(prev => ({
+            ...prev,
+            empresa: prev.empresa === empresa ? 'all' : (empresa || 'all')
+        }));
+    }, []);
+
+    const handleCnpjFilter = useCallback((cnpj: string | null) => {
+        setFilters(prev => ({
+            ...prev,
+            cnpj: prev.cnpj === cnpj ? 'all' : (cnpj || 'all')
+        }));
     }, []);
 
     const clearFilters = () => {
@@ -147,6 +164,8 @@ export default function App() {
                             filteredData={filteredCollaborators}
                             allData={collaborators}
                             onLotacaoSelect={handleLotacaoFilter}
+                            onEmpresaSelect={handleEmpresaFilter}
+                            onCnpjSelect={handleCnpjFilter}
                             filters={filters}
                         />
                     )}

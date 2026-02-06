@@ -11,20 +11,22 @@ interface DashboardProps {
     filteredData: Collaborator[];
     allData: Collaborator[];
     onLotacaoSelect: (lotacao: string | null) => void;
+    onEmpresaSelect: (empresa: string | null) => void;
+    onCnpjSelect: (cnpj: string | null) => void;
     filters: { payrollDate: string; };
 }
 
 type ChartKey = 'salary' | 'cnpj' | 'headcount' | 'monthly';
 
-const Dashboard: React.FC<DashboardProps> = ({ filteredData, allData, onLotacaoSelect, filters }) => {
+const Dashboard: React.FC<DashboardProps> = ({ filteredData, allData, onLotacaoSelect, onEmpresaSelect, onCnpjSelect, filters }) => {
     const [maximizedChart, setMaximizedChart] = useState<ChartKey | null>(null);
 
     const renderMaximizedChart = () => {
         if (!maximizedChart) return null;
 
         switch (maximizedChart) {
-            case 'salary': return <SalaryChart data={filteredData} isMaximized={true} />;
-            case 'cnpj': return <CnpjChart data={filteredData} isMaximized={true} />;
+            case 'salary': return <SalaryChart data={filteredData} isMaximized={true} onEmpresaSelect={onEmpresaSelect} />;
+            case 'cnpj': return <CnpjChart data={filteredData} isMaximized={true} onCnpjSelect={onCnpjSelect} />;
             case 'headcount': return <HeadcountChart data={filteredData} onLotacaoSelect={onLotacaoSelect} isMaximized={true} />;
             case 'monthly': return <HeadcountByMonthChart allData={allData} payrollDate={filters.payrollDate} isMaximized={true} />;
             default: return null;
@@ -40,8 +42,8 @@ const Dashboard: React.FC<DashboardProps> = ({ filteredData, allData, onLotacaoS
             />
             {filteredData.length > 0 || allData.length > 0 ? (
                 <div className="grid grid-cols-1 gap-8">
-                    <SalaryChart data={filteredData} onMaximize={() => setMaximizedChart('salary')} />
-                    <CnpjChart data={filteredData} onMaximize={() => setMaximizedChart('cnpj')} />
+                    <SalaryChart data={filteredData} onMaximize={() => setMaximizedChart('salary')} onEmpresaSelect={onEmpresaSelect} />
+                    <CnpjChart data={filteredData} onMaximize={() => setMaximizedChart('cnpj')} onCnpjSelect={onCnpjSelect} />
                     <HeadcountChart data={filteredData} onLotacaoSelect={onLotacaoSelect} onMaximize={() => setMaximizedChart('headcount')} />
                     <HeadcountByMonthChart allData={allData} payrollDate={filters.payrollDate} onMaximize={() => setMaximizedChart('monthly')} />
                 </div>
