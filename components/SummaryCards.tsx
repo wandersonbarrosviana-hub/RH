@@ -1,21 +1,31 @@
 import React, { useMemo } from 'react';
 import type { Collaborator } from '../types';
 
-const StatCard: React.FC<{ title: string; value: string; change?: string; changeType?: 'positive' | 'negative' }> = ({ title, value, change, changeType }) => (
-    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-100 flex-1 min-w-[180px]">
-        <div className="flex justify-between items-start mb-2">
-            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">{title}</h4>
-            {change && (
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${changeType === 'positive' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {change}
-                </span>
-            )}
+const StatCard: React.FC<{ title: string; value: string; fullValue?: string; change?: string; changeType?: 'positive' | 'negative' }> = ({ title, value, fullValue, change, changeType }) => {
+    const [isHovered, setIsHovered] = React.useState(false);
+
+    return (
+        <div
+            className="bg-white p-4 rounded-lg shadow-lg border border-gray-100 flex-1 min-w-[180px]"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <div className="flex justify-between items-start mb-2">
+                <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">{title}</h4>
+                {change && (
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${changeType === 'positive' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {change}
+                    </span>
+                )}
+            </div>
+            <div className="flex items-baseline">
+                <p className="text-xl lg:text-2xl font-bold text-gray-900" title={fullValue || value}>
+                    {isHovered && fullValue ? fullValue : value}
+                </p>
+            </div>
         </div>
-        <div className="flex items-baseline">
-            <p className="text-xl lg:text-2xl font-bold text-gray-900">{value}</p>
-        </div>
-    </div>
-);
+    );
+};
 
 /**
  * A robust currency parser that handles different formats (e.g., BRL '1.234,56' and US '1,234.56').
@@ -123,6 +133,17 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ filteredData, allData, filt
     }, [filteredData, allData, filters.payrollDate]);
 
     const formatBRL = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+    // CUSTOM ABBREVIATION FORMATTER
+    const formatCompactNumber = (num: number) => {
+        if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace('.0', '') + ' Bi';
+        if (num >= 1000000) return (num / 1000000).toFixed(1).replace('.0', '') + ' Mi';
+        if (num >= 1000) return (num / 1000).toFixed(1).replace('.0', '') + ' K';
+        return num.toString();
+    };
+
+    const formatCompactBRL = (value: number) => `R$ ${formatCompactNumber(value)}`;
+
     const formatChange = (val: number) => `${val >= 0 ? '+' : ''}${val.toFixed(1)}%`;
     const getChangeType = (val: number) => val >= 0 ? 'positive' : 'negative';
 
@@ -132,37 +153,43 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ filteredData, allData, filt
         <div className="flex flex-wrap gap-4 lg:gap-6">
             <StatCard
                 title="Remuneração Total"
-                value={formatBRL(kpis.remuneration.value)}
+                value={formatCompactBRL(kpis.remuneration.value)}
+                fullValue={formatBRL(kpis.remuneration.value)}
                 change={hasHistory ? formatChange(kpis.remuneration.change) : undefined}
                 changeType={getChangeType(kpis.remuneration.change)}
             />
             <StatCard
                 title="Total de Registros"
-                value={String(kpis.count.value)}
+                value={formatCompactNumber(kpis.count.value)}
+                fullValue={String(kpis.count.value)}
                 change={hasHistory ? formatChange(kpis.count.change) : undefined}
                 changeType={getChangeType(kpis.count.change)}
             />
             <StatCard
                 title="Total INSS"
-                value={formatBRL(kpis.inss.value)}
+                value={formatCompactBRL(kpis.inss.value)}
+                fullValue={formatBRL(kpis.inss.value)}
                 change={hasHistory ? formatChange(kpis.inss.change) : undefined}
                 changeType={getChangeType(kpis.inss.change)}
             />
             <StatCard
                 title="Saúde + Odonto"
-                value={formatBRL(kpis.saudeOdonto.value)}
+                value={formatCompactBRL(kpis.saudeOdonto.value)}
+                fullValue={formatBRL(kpis.saudeOdonto.value)}
                 change={hasHistory ? formatChange(kpis.saudeOdonto.change) : undefined}
                 changeType={getChangeType(kpis.saudeOdonto.change)}
             />
             <StatCard
                 title="Benefícios"
-                value={formatBRL(kpis.beneficio.value)}
+                value={formatCompactBRL(kpis.beneficio.value)}
+                fullValue={formatBRL(kpis.beneficio.value)}
                 change={hasHistory ? formatChange(kpis.beneficio.change) : undefined}
                 changeType={getChangeType(kpis.beneficio.change)}
             />
             <StatCard
                 title="Seguro de Vida"
-                value={formatBRL(kpis.seguro.value)}
+                value={formatCompactBRL(kpis.seguro.value)}
+                fullValue={formatBRL(kpis.seguro.value)}
                 change={hasHistory ? formatChange(kpis.seguro.change) : undefined}
                 changeType={getChangeType(kpis.seguro.change)}
             />
