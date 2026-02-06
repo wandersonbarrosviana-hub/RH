@@ -9,23 +9,7 @@ interface CnpjChartProps {
     isMaximized?: boolean;
 }
 
-const ChartWrapper: React.FC<{ title: string; children: React.ReactNode; onMaximize?: () => void; isScrollable?: boolean }> = ({ title, children, onMaximize, isScrollable }) => (
-    <div className="relative bg-white p-4 rounded-lg shadow-inner border border-gray-100 flex flex-col h-96">
-        <h3 className="text-md font-semibold text-gray-700 mb-2 text-center flex-shrink-0">{title}</h3>
-        {onMaximize && (
-            <button
-                onClick={onMaximize}
-                className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-700 transition"
-                title="Maximizar Gráfico"
-            >
-                <MaximizeIcon className="h-5 w-5" />
-            </button>
-        )}
-        <div className={`flex-1 w-full ${isScrollable ? 'overflow-y-auto pr-2' : 'overflow-hidden'}`}>
-            {children}
-        </div>
-    </div>
-);
+
 
 // ... (CustomTooltip, renderCustomizedLabel, parseCurrency remain same)
 // I need to keep them. 
@@ -34,7 +18,7 @@ const ChartWrapper: React.FC<{ title: string; children: React.ReactNode; onMaxim
 
 
 const ChartWrapper: React.FC<{ title: string; children: React.ReactNode; onMaximize?: () => void; isScrollable?: boolean }> = ({ title, children, onMaximize, isScrollable }) => (
-    <div className="relative bg-white p-4 rounded-lg shadow-inner border border-gray-100 flex flex-col h-96">
+    <div className={`relative bg-white p-4 rounded-lg shadow-inner border border-gray-100 flex flex-col ${isScrollable ? 'h-96' : 'h-full'}`}>
         <h3 className="text-md font-semibold text-gray-700 mb-2 text-center flex-shrink-0">{title}</h3>
         {onMaximize && (
             <button

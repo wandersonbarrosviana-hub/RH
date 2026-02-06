@@ -11,7 +11,7 @@ interface HeadcountChartProps {
 }
 
 const ChartWrapper: React.FC<{ title: string; children: React.ReactNode; onMaximize?: () => void; isScrollable?: boolean }> = ({ title, children, onMaximize, isScrollable }) => (
-    <div className="relative bg-white p-4 rounded-lg shadow-inner border border-gray-100 flex flex-col h-96">
+    <div className={`relative bg-white p-4 rounded-lg shadow-inner border border-gray-100 flex flex-col ${isScrollable ? 'h-96' : 'h-full'}`}>
         <h3 className="text-md font-semibold text-gray-700 mb-2 text-center flex-shrink-0">{title}</h3>
         {onMaximize && (
             <button

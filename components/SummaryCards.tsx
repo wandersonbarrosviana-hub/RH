@@ -2,16 +2,18 @@ import React, { useMemo } from 'react';
 import type { Collaborator } from '../types';
 
 const StatCard: React.FC<{ title: string; value: string; change?: string; changeType?: 'positive' | 'negative' }> = ({ title, value, change, changeType }) => (
-    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-100 flex-1 min-w-[180px] relative">
-        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider pr-6">{title}</h4>
-        <div className="mt-1 flex items-baseline">
+    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-100 flex-1 min-w-[180px]">
+        <div className="flex justify-between items-start mb-2">
+            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">{title}</h4>
+            {change && (
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${changeType === 'positive' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {change}
+                </span>
+            )}
+        </div>
+        <div className="flex items-baseline">
             <p className="text-xl lg:text-2xl font-bold text-gray-900">{value}</p>
         </div>
-        {change && (
-            <span className={`absolute top-3 right-3 text-xs font-bold ${changeType === 'positive' ? 'text-green-600' : 'text-red-500'}`}>
-                {change}
-            </span>
-        )}
     </div>
 );
 
