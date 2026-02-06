@@ -196,7 +196,6 @@ export default function App() {
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
                 onSettingsChanged={fetchSettings}
-                onClearFilters={clearFilters}
                 onDeleteAll={deleteAllCollaborators}
             />
         </div>
