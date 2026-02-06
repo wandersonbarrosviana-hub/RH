@@ -1,0 +1,5 @@
+{
+  "name": "HR Collaborator Control",
+  "description": "A robust application for Human Resources to manage and control collaborator information. It allows importing data from spreadsheets and manually registering employees with detailed fields.",
+  "requestFramePermissions": []
+}

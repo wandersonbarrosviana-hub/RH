@@ -1,0 +1,41 @@
+
+export interface Collaborator {
+    id: string;
+    data: string;
+    lotacao: string;
+    nome: string;
+    cargo: string;
+    admissao: string;
+    niver: string;
+    cpf: string;
+    empresa: string;
+    cnpj: string;
+    salarioBase: string;
+    quebraDeCaixa: string;
+    salarioBaseComQuebra: string;
+    adiantamento: number;
+    salarioFamilia: string;
+    difCaixa: string;
+    planoSaude: string;
+    odonto: string;
+    inss: string;
+    irrf: string;
+    fgts: string;
+    vale: string;
+    pensao: string;
+    consignado: string;
+    primeiraParcela13: string;
+    segundaParcela13: string;
+    salarioLiquido: number;
+    falta: string;
+    dsr: string;
+    atestados: string;
+    folgas: string;
+    diasTrabalhadosBase: string;
+    diasTrabalhados: string;
+    vt: string;
+    va: string;
+    beneficio: string;
+    observacoes: string;
+    seguroDeVida: string;
+}
