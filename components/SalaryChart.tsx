@@ -26,7 +26,51 @@ const ChartWrapper: React.FC<{ title: string; children: React.ReactNode; onMaxim
     </div>
 );
 
-// ... (CustomTooltip, renderCustomizedLabel, parseCurrency remain same)
+const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-xl text-sm">
+                <p className="font-bold text-gray-800 mb-1">{`${label}`}</p>
+                <p className="text-pink-600">{`Total: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payload[0].value)}`}</p>
+            </div>
+        );
+    }
+    return null;
+};
+
+const COLORS = ['#ec4899', '#f472b6', '#f9a8d4', '#fbcfe8'];
+
+const renderCustomizedLabel = (props: { x: number; y: number; width: number; value: number; }) => {
+    const { x, y, width, value } = props;
+    const formattedValue = `R$${(value / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}k`;
+    return (
+        <text x={x + width + 5} y={y + 12} fill="#666" textAnchor="start" fontSize={12}>
+            {formattedValue}
+        </text>
+    );
+};
+
+const parseCurrency = (value: string | number): number => {
+    if (typeof value === 'number') return value;
+    if (typeof value !== 'string' || !value) return 0;
+
+    let parsableString = String(value).replace(/[^\d.,-]+/g, '');
+
+    const lastDot = parsableString.lastIndexOf('.');
+    const lastComma = parsableString.lastIndexOf(',');
+
+    if (lastDot > -1 && lastComma > -1) {
+        if (lastComma > lastDot) {
+            parsableString = parsableString.replace(/\./g, '').replace(',', '.');
+        } else {
+            parsableString = parsableString.replace(/,/g, '');
+        }
+    } else if (lastComma > -1) {
+        parsableString = parsableString.replace(',', '.');
+    }
+
+    return parseFloat(parsableString) || 0;
+};
 
 const SalaryChart: React.FC<SalaryChartProps> = ({ data, onMaximize }) => {
     const chartData = useMemo(() => {

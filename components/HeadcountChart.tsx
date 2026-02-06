@@ -27,7 +27,17 @@ const ChartWrapper: React.FC<{ title: string; children: React.ReactNode; onMaxim
     </div>
 );
 
-// ... CustomTooltip ...
+const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-xl text-sm">
+                <p className="font-bold text-gray-800 mb-1">{`${label}`}</p>
+                <p className="text-pink-600">{`Total de Registros: ${payload[0].value}`}</p>
+            </div>
+        );
+    }
+    return null;
+};
 
 const HeadcountChart: React.FC<HeadcountChartProps> = ({ data, onLotacaoSelect, onMaximize }) => {
     const chartData = useMemo(() => {
