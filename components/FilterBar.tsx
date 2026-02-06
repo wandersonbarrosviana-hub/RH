@@ -78,7 +78,36 @@ const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters, options, onC
                 </FilterInput>
 
                 <FilterInput label="Mês de Referência">
-                    <input type="month" name="payrollDate" value={filters.payrollDate} onChange={handleInputChange} className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-pink-400" />
+                    <div className="flex flex-col gap-2">
+                        <div className="flex gap-1">
+                            <input
+                                type="month"
+                                id="date-adder"
+                                className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-pink-400"
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val && !filters.payrollDate.includes(val)) {
+                                        setFilters(prev => ({ ...prev, payrollDate: [...prev.payrollDate, val].sort() }));
+                                        e.target.value = ''; // Reset
+                                    }
+                                }}
+                            />
+                        </div>
+                        <div className="flex flex-wrap gap-1 max-w-[200px]">
+                            {filters.payrollDate.length > 0 ? filters.payrollDate.map(date => (
+                                <span key={date} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-pink-100 text-pink-800">
+                                    {date}
+                                    <button
+                                        type="button"
+                                        onClick={() => setFilters(prev => ({ ...prev, payrollDate: prev.payrollDate.filter(d => d !== date) }))}
+                                        className="ml-1 text-pink-600 hover:text-pink-900 focus:outline-none"
+                                    >
+                                        &times;
+                                    </button>
+                                </span>
+                            )) : <span className="text-xs text-gray-400">Nenhum mês selecionado</span>}
+                        </div>
+                    </div>
                 </FilterInput>
 
 

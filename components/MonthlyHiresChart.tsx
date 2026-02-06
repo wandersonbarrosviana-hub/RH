@@ -42,17 +42,21 @@ const MONTHS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', '
 const HeadcountByMonthChart: React.FC<HeadcountByMonthChartProps> = ({ allData, payrollDate, onMaximize }) => {
 
     const { chartData, year } = useMemo(() => {
-        // Use payrollDate to determine the year, fallback to current year
-        const targetYear = payrollDate ? new Date(payrollDate + '-02T00:00:00Z').getFullYear() : new Date().getFullYear();
+        // Use payrollDate to determine the year, fallback to current year. Uses the first selected date's year.
+        const targetYear = (payrollDate && payrollDate.length > 0) ? parseInt(payrollDate[0].split('-')[0]) : new Date().getFullYear();
 
         const monthlyData = MONTHS.map((monthName, index) => {
-            const monthString = `${targetYear}-${String(index + 1).padStart(2, '0')}`;
+            const monthPadded = String(index + 1).padStart(2, '0');
+            const monthString = `${targetYear}-${monthPadded}`;
 
             // Filter collaborators whose 'data' field matches the current month and year
             const collaboratorsForMonth = allData.filter(c => c.data && c.data.startsWith(monthString));
 
-            // Count the total number of records for the month, not unique CPFs.
-            return { name: monthName, count: collaboratorsForMonth.length };
+            // Check if this specific month is selected in the filters
+            const isSelected = payrollDate && payrollDate.includes(monthString);
+
+            // Count the total number of records for the month.
+            return { name: monthName, count: collaboratorsForMonth.length, isSelected };
         });
 
         return { chartData: monthlyData, year: targetYear };
