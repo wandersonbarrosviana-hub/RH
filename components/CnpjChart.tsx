@@ -53,7 +53,7 @@ const renderCustomizedLabel = (props: { x: number; y: number; width: number; val
 const parseCurrency = (value: string | number): number => {
     if (typeof value === 'number') return value;
     if (typeof value !== 'string' || !value) return 0;
-    
+
     // Remove anything that isn't a digit, comma, dot, or hyphen (for negative numbers)
     let parsableString = String(value).replace(/[^\d.,-]+/g, '');
 
@@ -69,13 +69,13 @@ const parseCurrency = (value: string | number): number => {
             // If dot is last, it's the decimal separator (US style: 1,234.56)
             parsableString = parsableString.replace(/,/g, '');
         }
-    } 
+    }
     // If only a comma exists, it must be the decimal separator (e.g., 1234,56)
     else if (lastComma > -1) {
         parsableString = parsableString.replace(',', '.');
     }
     // If only a dot exists (or none), it's already in a parsable format (e.g., 1234.56 or 1234)
-    
+
     return parseFloat(parsableString) || 0;
 };
 
@@ -110,11 +110,22 @@ const CnpjChart: React.FC<CnpjChartProps> = ({ data, onMaximize }) => {
                 >
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                     <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 10 }} />
+                    <YAxis
+                        dataKey="name"
+                        type="category"
+                        width={150}
+                        tick={{ fontSize: 11 }}
+                        tickFormatter={(value) => {
+                            if (value.length > 20) {
+                                return value.substring(0, 20) + '...';
+                            }
+                            return value;
+                        }}
+                    />
                     <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(236, 72, 153, 0.1)' }} />
                     <Bar dataKey="total" name="Remuneração Total" barSize={15}>
                         <LabelList dataKey="total" position="right" content={renderCustomizedLabel} />
-                         {chartData.map((entry, index) => (
+                        {chartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Bar>
